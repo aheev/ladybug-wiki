@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'LadybugDB Wiki',
   description: 'Engineering reference for LadybugDB — algorithms, data structures, and implementation details',
-  base: '/',
+  base: process.env.GITHUB_ACTIONS ? '/ladybug-wiki/' : '/',
 
   head: [
     ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
@@ -122,14 +122,14 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/LadybugDB/ladybug/edit/master/docs/:path',
-      text: 'View source on GitHub',
+      pattern: 'https://github.com/aheev/ladybug-wiki/edit/main/docs/:path',
+      text: 'Edit this page on GitHub',
     },
   },
 
   markdown: {
     theme: {
-      light: 'github-dark',
+      light: 'github-light',
       dark: 'github-dark',
     },
     lineNumbers: true,
