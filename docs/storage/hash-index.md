@@ -6,6 +6,50 @@
 
 The `HashIndex` is the primary key index for node tables. It maps a key (e.g., a string or integer primary key) to a `node_offset_t` — the row position in the node table. It is the single path for point lookups on primary keys.
 
+## CREATE INDEX DDL
+
+By default, every node table's primary key column automatically gets a hash index at table creation time (controlled by `enable_default_hash_index`, which defaults to `true`). Additional hash indexes can be created explicitly with `CREATE INDEX`:
+
+```cypher
+-- Default form (creates a HASH index)
+CREATE INDEX idx_name [IF NOT EXISTS] FOR (p:TableName) ON (p.propertyName)
+
+-- Explicit HASH form (identical behaviour)
+CREATE HASH INDEX idx_name [IF NOT EXISTS] FOR (p:TableName) ON (p.propertyName)
+```
+
+**`IF NOT EXISTS` semantics:**
+- Without `IF NOT EXISTS`: throws a `BinderException` if an index with that name already exists on the table.
+- With `IF NOT EXISTS`: returns `"Index idx_name already exists."` and is a no-op — safe for idempotent scripts.
+
+**Example:**
+
+```cypher
+CREATE NODE TABLE person(id INT64, name STRING, PRIMARY KEY(id));
+-- PK index created automatically (enable_default_hash_index=true)
+
+-- Create an explicit index on a non-PK property (when supported)
+CREATE HASH INDEX idx_person_name IF NOT EXISTS FOR (p:person) ON (p.name);
+```
+
+**`SHOW_INDEXES()` — inspect existing indexes:**
+
+```cypher
+CALL SHOW_INDEXES() RETURN table_name, index_name, property_names;
+-- idx_person|idx_person_pk|[id]
+```
+
+**Disabling automatic PK indexes:**
+
+```cypher
+CALL enable_default_hash_index=false;
+CREATE NODE TABLE person(id INT64, name STRING, PRIMARY KEY(id));
+-- No index created automatically; add one explicitly when needed
+```
+
+The DDL flow goes through the full binder → planner → executor pipeline:
+`ParseCreateIndex` → `BoundCreateIndex` → `LogicalCreateIndex` → `CreateIndexPhysicalOperator` → `NodeTable::addIndex()`
+
 ## Dual-Layer Architecture
 
 ```

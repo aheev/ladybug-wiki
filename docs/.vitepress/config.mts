@@ -91,6 +91,7 @@ export default defineConfig({
         items: [
           { text: 'Building LadybugDB', link: '/dev/building' },
           { text: 'Testing Guide', link: '/dev/testing' },
+          { text: 'Incident Reports', link: '/dev/incidents' },
         ],
       },
       {

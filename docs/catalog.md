@@ -307,10 +307,28 @@ GDS (Graph Data Science) functions call `Catalog::Get(context).graphs->getEntry(
 
 ```cpp
 class IndexCatalogEntry : public CatalogEntry {
-    IndexType   indexType;    // currently only HASH
-    table_id_t  tableID;
-    column_id_t columnID;
+    IndexType              indexType;    // currently only HASH
+    table_id_t             tableID;      // table that owns this index
+    std::string            indexName;    // user-supplied name
+    std::vector<property_id_t> propertyIDs; // indexed properties (one for hash indexes)
+    std::unique_ptr<IndexAuxInfo> auxInfo;   // loaded index data (null when not in use)
 };
+```
+
+Every node table's primary key column automatically gets a hash index at creation time (unless `enable_default_hash_index=false`). Additional indexes are created explicitly with `CREATE [HASH] INDEX`:
+
+```cypher
+CREATE HASH INDEX idx_name [IF NOT EXISTS] FOR (p:TableName) ON (p.propertyName)
+```
+
+DDL flow: `ParseCreateIndex` → `BoundCreateIndex` → `LogicalCreateIndex` → `CreateIndexPhysicalOperator` → `NodeTable::addIndex()` → `indexes->createEntry(tx, IndexCatalogEntry{...})` → WAL `CREATE_CATALOG_ENTRY_RECORD`.
+
+`toCypher()` on `BuiltinIndexAuxInfo` produces the full `CREATE HASH INDEX ...` string used for checkpoint serialization and `ALTER TABLE` replay.
+
+**`SHOW_INDEXES()` table function** lists all indexes in the catalog:
+
+```cypher
+CALL SHOW_INDEXES() RETURN table_name, index_name, property_names;
 ```
 
 ## DDL and Catalog MVCC: End-to-End

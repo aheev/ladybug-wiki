@@ -74,11 +74,33 @@ while (currentBatchIdx < batchSizes.size()) {
 }
 ```
 
+### Arrow Relationship Tables
+
+`ArrowRelTable` extends `ColumnarRelTableBase` and enables relationship scans over in-process Arrow arrays. The `from` and `to` node ID columns are identified by position at construction time (`fromColumnIdx`, `toColumnIdx`) and stripped from the output — they are used only for adjacency resolution.
+
+```cpp
+// Arrow arrays are passed in at registration time
+ArrowRelTable(relGroupEntry, fromTableID, toTableID, storageManager, memoryManager,
+              fromNodeTable, toNodeTable, schema, arrays, arrowId);
+```
+
+**Scan state (`ArrowRelTableScanState`):**
+
+```cpp
+struct ArrowRelTableScanState : RelTableScanState {
+    // setToTable() initialises direction, columnIDs, predicate sets
+    // scanInternal() iterates Arrow arrays, resolves node offsets, fills output ValueVectors
+};
+```
+
+Adjacency resolution walks the Arrow arrays to collect neighbour offsets for a given source node ID, then fills the output `ValueVector`s with property values for those edges. Direction is fully supported (forward and backward).
+
 **Key properties:**
-- Morsel size = 2048 rows (matches the VECTOR_CAPACITY default)
-- Shared state uses a mutex for thread-safe morsel assignment across parallel scan threads
+- Morsel size = 2048 rows (same as Arrow node tables)
+- Shared mutex on `ArrowNodeTableScanSharedState` for parallel morsel assignment
 - No WAL, no shadow file, no MVCC versioning
 - Data lives in Arrow's memory, not Ladybug's buffer pool
+- Relationship property columns map via `propertyColumnToArrowColumnIdx`
 
 ---
 
