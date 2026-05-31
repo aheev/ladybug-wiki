@@ -11,7 +11,16 @@ LadybugDB is an **embeddable, serverless analytical graph database** written in 
 └─────────────────────────────┬────────────────────────────────────┘
                               │  Language Binding (C API)
 ┌─────────────────────────────▼────────────────────────────────────┐
-│                     ClientContext / Connection                   │
+│                          Database                                │
+│  BufferManager · StorageManager · TransactionManager · Catalog  │
+│  QueryProcessor (thread pool) · DatabaseLifeCycleManager         │
+└─────────────────────────────┬────────────────────────────────────┘
+                              │  one per client session
+┌─────────────────────────────▼────────────────────────────────────┐
+│                  Connection / ClientContext                       │
+│  mtx (per-session lock) · ActiveQuery (interrupt/timeout)        │
+│  TransactionContext · CachedPreparedStatementManager             │
+│  GraphEntrySet (projected graphs) · ScanReplacements             │
 └──────┬───────────────────────────────────────────────────────────┘
        │
        ▼
@@ -33,6 +42,17 @@ LadybugDB is an **embeddable, serverless analytical graph database** written in 
        │                     Query Executor                        │
        │   Pipelines of operators  │  Morsel-driven thread pool    │
        │   DataChunk / ValueVector │  SelectionVector filtering    │
+       │                           │                               │
+       │   ┌── GDS / RecursiveExtend ──────────────────────────┐   │
+       │   │  FrontierPair (sparse/dense/adaptive)             │   │
+       │   │  OnDiskGraph · EdgeCompute · BFSGraph             │   │
+       │   │  GDSUtils::runAlgorithmEdgeCompute()              │   │
+       │   └───────────────────────────────────────────────────┘   │
+       │                                                           │
+       │   ┌── COPY FROM ──────────────────────────────────────┐   │
+       │   │  NodeBatchInsert · IndexBuilder (256 sub-indexes) │   │
+       │   │  CopyRelBatchInsert · Partitioner (CSR building)  │   │
+       │   └───────────────────────────────────────────────────┘   │
        └────────────────────────────────────────────────┬──────────┘
                                                         │
        ┌────────────────────────────────────────────────▼──────────┐
@@ -64,8 +84,8 @@ The codebase lives under namespace `lbug`. Key sub-namespaces:
 | `lbug::parser` | `src/parser/` | ANTLR4 Cypher parsing |
 | `lbug::catalog` | `src/catalog/` | Schema: tables, columns, functions |
 | `lbug::transaction` | `src/transaction/` | TX manager, MVCC |
-| `lbug::function` | `src/function/` | Built-in scalar / aggregate functions |
-| `lbug::graph` | `src/graph/` | Graph entry point, table accessors |
+| `lbug::function` | `src/function/` | Built-in scalar / aggregate functions + GDS algorithms |
+| `lbug::graph` | `src/graph/` | `OnDiskGraph`, `GraphEntrySet`, projected graph management |
 | `lbug::main` | `src/main/` | `Database`, `Connection`, `ClientContext` |
 | `lbug::extension` | `src/extension/` | Extension loading framework |
 
@@ -96,3 +116,9 @@ ORDER BY f.age
 **Node group granularity** — the fundamental storage unit is a node group (~128K nodes). This is also the morsel granularity for native table scans, balancing parallelism overhead vs work unit size.
 
 **Shadow file over WAL for page writes** — rather than a redo log, modified pages are written to a shadow file first. On commit, shadow pages are atomically swapped to the live file. The WAL records logical operations (catalog changes, extension loads) not page diffs.
+
+**Per-connection `ClientContext`** — all mutable per-session state (active transaction, prepared statement cache, projected graph registry, interrupt flag) lives in `ClientContext`, keeping `Database` contention-free for concurrent connections.
+
+**Adaptive GDS frontiers** — BFS/DFS algorithms start with sparse hash-map frontiers and switch to dense bitarray frontiers when the active node count exceeds a threshold, keeping iteration cost proportional to the active frontier size.
+
+**COPY FROM always checkpoints** — bulk-load transactions unconditionally trigger a WAL flush and checkpoint after commit, ensuring that node-group pages written during COPY are immediately persisted without waiting for the regular auto-checkpoint threshold.

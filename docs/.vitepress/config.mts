@@ -19,8 +19,12 @@ export default defineConfig({
       { text: 'Execution', link: '/execution/vectorized' },
       { text: 'Transactions', link: '/transaction/mvcc' },
       { text: 'Query', link: '/query/cypher-internals' },
+      { text: 'Common', link: '/common/type-system' },
       { text: 'Extensions', link: '/extensions/architecture' },
+      { text: 'Functions', link: '/functions/scalar-functions' },
+      { text: 'Main', link: '/main/connection-lifecycle' },
       { text: 'Development', link: '/dev/building' },
+      { text: 'API', link: '/api/python' },
     ],
 
     sidebar: [
@@ -46,6 +50,7 @@ export default defineConfig({
           { text: 'WAL Internals (Two-Tier)', link: '/storage/wal-internals' },
           { text: 'Storage Backends', link: '/storage/storage-backends' },
           { text: 'Icebug-Disk Format', link: '/storage/icebug-disk' },
+          { text: 'Native Rel Tables', link: '/storage/native-rel-tables' },
         ],
       },
       {
@@ -57,6 +62,14 @@ export default defineConfig({
           { text: 'UndoBuffer Chain', link: '/transaction/undo-buffer' },
           { text: 'Local Storage', link: '/transaction/local-storage' },
           { text: 'Checkpointing', link: '/transaction/checkpointing' },
+        ],
+      },
+      {
+        text: 'Client & Connection',
+        collapsed: false,
+        items: [
+          { text: 'Connection & Query Lifecycle', link: '/main/connection-lifecycle' },
+          { text: 'COPY FROM Mechanics', link: '/main/copy-mechanics' },
         ],
       },
       {
@@ -82,7 +95,20 @@ export default defineConfig({
           { text: 'Logical Planner', link: '/query/planner' },
           { text: 'Optimizer', link: '/query/optimizer' },
           { text: 'Optimizer Passes (Deep Dive)', link: '/query/optimizer-passes' },
+          { text: 'Physical Planner', link: '/query/physical-planner' },
           { text: 'Expression Evaluator', link: '/query/expressions' },
+          { text: 'Factorization & Schema Groups', link: '/query/factorization' },
+          { text: 'Join-Order Enumeration', link: '/query/join-order' },
+        ],
+      },
+      {
+        text: 'Common Utilities',
+        collapsed: false,
+        items: [
+          { text: 'Type System', link: '/common/type-system' },
+          { text: 'Data Chunk & Vector Layer', link: '/common/data-chunk' },
+          { text: 'File System Abstraction', link: '/common/file-system' },
+          { text: 'Task Scheduler & Progress', link: '/common/task-scheduler' },
         ],
       },
       {
@@ -99,6 +125,23 @@ export default defineConfig({
         collapsed: true,
         items: [
           { text: 'Extension Architecture', link: '/extensions/architecture' },
+          { text: 'Vector Index (HNSW)', link: '/extensions/vector-index' },
+          { text: 'Full-Text Search (BM25)', link: '/extensions/fts' },
+          { text: 'LLM Embeddings', link: '/extensions/llm' },
+          { text: 'HTTPFS (HTTP / S3 / GCS / Xet)', link: '/extensions/httpfs' },
+          { text: 'External Scanners (DuckDB / Postgres / SQLite / ADBC / Neo4j)', link: '/extensions/external-scanners' },
+          { text: 'Lakehouse (Delta / Iceberg / Unity Catalog)', link: '/extensions/lakehouse' },
+          { text: 'Graph Algorithms (ALGO)', link: '/extensions/algo' },
+          { text: 'JSON', link: '/extensions/json' },
+        ],
+      },
+      {
+        text: 'Functions',
+        collapsed: false,
+        items: [
+          { text: 'Scalar Functions', link: '/functions/scalar-functions' },
+          { text: 'Table Functions', link: '/functions/table-functions' },
+          { text: 'Aggregate Functions', link: '/functions/aggregate-functions' },
         ],
       },
       {
@@ -106,6 +149,18 @@ export default defineConfig({
         collapsed: true,
         items: [
           { text: 'Glossary', link: '/glossary' },
+        ],
+      },
+      {
+        text: 'API Bindings',
+        collapsed: false,
+        items: [
+          { text: 'Python',      link: '/api/python' },
+          { text: 'Java',        link: '/api/java' },
+          { text: 'Node.js',     link: '/api/nodejs' },
+          { text: 'Rust',        link: '/api/rust' },
+          { text: 'C API',       link: '/api/c-api' },
+          { text: 'WebAssembly', link: '/api/wasm' },
         ],
       },
     ],

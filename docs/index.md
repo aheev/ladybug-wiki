@@ -21,6 +21,15 @@ This wiki covers algorithms, data structures, and implementation decisions for c
 | What each optimizer pass does | [Optimizer Passes](/query/optimizer-passes) |
 | Which storage backend to use | [Storage Backends](/storage/storage-backends) |
 | How to build and run tests | [Building](/dev/building) · [Testing](/dev/testing) |
+| How DataChunk / ValueVector work internally | [Data Chunk & Vector Layer](/common/data-chunk) |
+| How the type system is implemented | [Type System](/common/type-system) |
+| How file I/O and serialization work | [File System Abstraction](/common/file-system) |
+| How worker threads are scheduled | [Task Scheduler & Progress](/common/task-scheduler) |
+| How factorization and schema groups work | [Factorization & Schema Groups](/query/factorization) |
+| How join order is enumerated | [Join-Order Enumeration](/query/join-order) |
+| How connections and queries are managed | [Connection & Query Lifecycle](/main/connection-lifecycle) |
+| How bulk COPY FROM works | [COPY FROM Mechanics](/main/copy-mechanics) |
+| How to use the Python / Java / Node.js APIs | [API Bindings](/api/python) |
 
 ## Contents
 
@@ -39,6 +48,7 @@ Columnar storage partitioned into **node groups** of 131,072 nodes each. Propert
 - [WAL Internals (Two-Tier)](/storage/wal-internals) — LocalWAL vs shared WAL, record types, recovery algorithm
 - [Storage Backends](/storage/storage-backends) — native, Arrow, Icebug-Disk, in-memory
 - [Icebug-Disk Format](/storage/icebug-disk) — on-disk file layout
+- [Native Rel Tables](/storage/native-rel-tables) — relationship table layout, adjacency list structure, CSR integration
 
 ### Transaction & MVCC
 
@@ -69,19 +79,59 @@ Vectorized, morsel-driven pipeline execution. Each pipeline is a chain of operat
 - [Optimizer](/query/optimizer) — SIP direction selection, predicate pushdown, join ordering
 - [Optimizer Passes (Deep Dive)](/query/optimizer-passes) — all 15 passes in order: RemoveFactorization → SIP → TopK → FactorizationRewriter
 - [Expression Evaluator](/query/expressions) — expression compilation and evaluation
+- [Factorization & Schema Groups](/query/factorization) — factorization plan nodes, `Schema`, `SchemaGroup`, flattening rules
+- [Join-Order Enumeration](/query/join-order) — DP-based join-order search, `QueryGraph`, cardinality estimation, hint planning
 
 ### Catalog & Schema
 
 - [Catalog System](/catalog) — CatalogSet namespaces, CatalogEntry MVCC version chains, all 14 entry types, DDL flows
 
+### Common Utilities
+
+Shared infrastructure used across storage, query, and execution layers.
+
+- [Type System](/common/type-system) — `LogicalType`, physical representation, type widening, CAST rules
+- [Data Chunk & Vector Layer](/common/data-chunk) — `DataChunk`, `DataChunkState`, `ValueVector`, `SelectionVector`, null masks, auxiliary buffers
+- [File System Abstraction](/common/file-system) — `FileSystem` virtual interface, local-file implementation, compressed-file wrapper, gzip reader, serializer layer
+- [Task Scheduler & Progress](/common/task-scheduler) — worker-thread pool, `Task`/`Processor` decomposition, terminal progress-bar integration
+
 ### Extension System
 
 - [Extension Architecture](/extensions/architecture) — `dlopen()` loading, registration API, WAL integration
+- [Vector Index (HNSW)](/extensions/vector-index) — approximate nearest-neighbour search, HNSW graph structure
+- [Full-Text Search (BM25)](/extensions/fts) — BM25 ranking, inverted index, phrase queries
+- [LLM Embeddings](/extensions/llm) — embedding generation, model integration
+- [HTTPFS (HTTP / S3 / GCS / Xet)](/extensions/httpfs) — remote object-store connectors
+- [External Scanners](/extensions/external-scanners) — DuckDB, Postgres, SQLite, ADBC, Neo4j bridges
+- [Lakehouse (Delta / Iceberg / Unity Catalog)](/extensions/lakehouse) — open table format readers
+- [Graph Algorithms (ALGO)](/extensions/algo) — built-in graph algorithm library
+- [JSON](/extensions/json) — JSON type support and functions
+
+### Client & Connection
+
+- [Connection & Query Lifecycle](/main/connection-lifecycle) — `Connection`, `ClientContext`, per-query state, result streaming
+- [COPY FROM Mechanics](/main/copy-mechanics) — CSV/Parquet bulk-load path, parallel reader, schema inference
+
+### Functions
+
+- [Scalar Functions](/functions/scalar-functions) — built-in scalar function registration, dispatch, and vectorized evaluation
+- [Table Functions](/functions/table-functions) — `TableFunction` interface, bind/init/scan callbacks, statistics estimation
+- [Aggregate Functions](/functions/aggregate-functions) — aggregation states, partial aggregation, finalize step
+
+### API Bindings
+
+- [Python](/api/python) — `ladybug` Python package, `Database`, `Connection`, `QueryResult` types
+- [Java](/api/java) — JDBC-style Java binding, JNI bridge
+- [Node.js](/api/nodejs) — Node.js addon, async query API
+- [Rust](/api/rust) — `ladybug` Rust crate
+- [C API](/api/c-api) — stable C ABI: `ladybug_database`, `ladybug_connection`, `ladybug_result`
+- [WebAssembly](/api/wasm) — WASM build, browser and Node.js runtime targets
 
 ### Development
 
 - [Building LadybugDB](/dev/building) — CMake targets, build types, sanitizers, flags, Windows
 - [Testing Guide](/dev/testing) — `.test` file format, gtest C++ tests, running specific tests, datasets
+- [Incident Reports](/dev/incidents) — post-mortems and known failure patterns
 
 ### Reference
 
