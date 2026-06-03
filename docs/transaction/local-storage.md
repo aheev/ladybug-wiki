@@ -8,13 +8,7 @@
 
 ## Why this document exists
 
-The old local-storage writeup described a simpler design than the one that exists today.
-
-This page is the corrected reference.
-
-It focuses on the exact runtime structures used by a write transaction.
-
-It also explains how those structures interact with MVCC, undo, WAL, index maintenance, scans, and checkpointing.
+It explains how those structures interact with MVCC, undo, WAL, index maintenance, scans, and checkpointing.
 
 If you need background on transaction visibility first, read [MVCC](/transaction/mvcc).
 
@@ -1432,27 +1426,27 @@ When a bug smells like transaction-local state, check these questions in order:
 
 ### Storage shapes
 
-| Component | Physical shape | Durability before commit | Primary purpose |
-| --- | --- | --- | --- |
-| `LocalNodeTable` | `NodeGroupCollection` | none | stage inserted local nodes |
-| `LocalRelTable` | one `NodeGroup` + direction maps | none | stage inserted local rels |
-| `LocalHashIndex` | in-memory insertion/deletion indexes | none | local PK visibility and uniqueness |
-| `OptimisticAllocator` | vector of page ranges | none | reclaim optimistic pages on rollback |
+| Component               | Physical shape                       | Durability before commit | Primary purpose                      |
+| ----------------------- | ------------------------------------ | ------------------------ | ------------------------------------ |
+| `LocalNodeTable`      | `NodeGroupCollection`              | none                     | stage inserted local nodes           |
+| `LocalRelTable`       | one `NodeGroup` + direction maps   | none                     | stage inserted local rels            |
+| `LocalHashIndex`      | in-memory insertion/deletion indexes | none                     | local PK visibility and uniqueness   |
+| `OptimisticAllocator` | vector of page ranges                | none                     | reclaim optimistic pages on rollback |
 
 ### Commit ordering
 
-| Level | Order |
-| --- | --- |
-| Transaction commit | local storage -> undo commit -> WAL flush |
-| Local storage commit | node local tables -> rel local tables -> optimistic allocators |
+| Level                   | Order                                                             |
+| ----------------------- | ----------------------------------------------------------------- |
+| Transaction commit      | local storage -> undo commit -> WAL flush                         |
+| Local storage commit    | node local tables -> rel local tables -> optimistic allocators    |
 | Node-table local commit | append rows -> reapply deletions -> commit indexes -> clear local |
-| Rel-table local commit | rewrite rel IDs -> materialize CSR rows -> clear local |
+| Rel-table local commit  | rewrite rel IDs -> materialize CSR rows -> clear local            |
 
 ### Rollback ordering
 
-| Level | Order |
-| --- | --- |
-| Transaction rollback | undo rollback -> local storage rollback |
+| Level                  | Order                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| Transaction rollback   | undo rollback -> local storage rollback                                      |
 | Local storage rollback | clear local tables -> rollback optimistic allocators -> page-manager cleanup |
 
 ## Source-backed checklist of facts to preserve in future edits

@@ -110,7 +110,10 @@ Shared infrastructure used across storage, query, and execution layers.
 ### Client & Connection
 
 - [Connection & Query Lifecycle](/main/connection-lifecycle) — `Connection`, `ClientContext`, per-query state, result streaming
-- [COPY FROM Mechanics](/main/copy-mechanics) — CSV/Parquet bulk-load path, parallel reader, schema inference
+
+### Import mechanics
+
+- [COPY FROM](/main/copy-mechanics) — CSV/Parquet bulk-load path, parallel reader, schema inference
 
 ### Functions
 

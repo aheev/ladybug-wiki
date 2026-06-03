@@ -68,8 +68,7 @@ export default defineConfig({
         text: 'Client & Connection',
         collapsed: false,
         items: [
-          { text: 'Connection & Query Lifecycle', link: '/main/connection-lifecycle' },
-          { text: 'COPY FROM Mechanics', link: '/main/copy-mechanics' },
+          { text: 'Connection & Query Lifecycle', link: '/main/connection-lifecycle' }
         ],
       },
       {
@@ -100,6 +99,13 @@ export default defineConfig({
           { text: 'Factorization & Schema Groups', link: '/query/factorization' },
           { text: 'Join-Order Enumeration', link: '/query/join-order' },
         ],
+      },
+    {
+        text: 'IMPORT mechanics',
+        collapsed: false,
+        items: [
+            { text: 'COPY FROM', link: '/main/copy-mechanics' },
+        ]
       },
       {
         text: 'Common Utilities',
