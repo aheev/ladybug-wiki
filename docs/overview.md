@@ -122,3 +122,5 @@ ORDER BY f.age
 **Adaptive GDS frontiers** — BFS/DFS algorithms start with sparse hash-map frontiers and switch to dense bitarray frontiers when the active node count exceeds a threshold, keeping iteration cost proportional to the active frontier size.
 
 **COPY FROM always checkpoints** — bulk-load transactions unconditionally trigger a WAL flush and checkpoint after commit, ensuring that node-group pages written during COPY are immediately persisted without waiting for the regular auto-checkpoint threshold.
+
+**Remote Lbug databases are page-cached, not bulk-downloaded** — attached remote Lbug DBs use the same table/index scan stack as local databases, but pages are fetched through the VFS and kept only in the buffer manager until eviction. See [Remote Lbug Databases](/storage/remote-lbug).

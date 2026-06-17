@@ -66,6 +66,17 @@ CREATE REL TABLE knows(FROM person TO person, since INT32);
 - Both FWD and BWD adjacency lists are stored as independent `RelTableData` objects in
   `directedRelData[0]` (FWD) and `directedRelData[1]` (BWD).
 
+### Remote Lbug attachments
+
+Attached remote Lbug databases are not a separate backend.
+They use the native backend, but the file path is opened through the VFS and the resulting pages
+are cached in the buffer manager on demand.
+
+- Reads stay page-based; the whole database is not downloaded up front.
+- The database is opened read-only.
+- Index pages, overflow pages, and table pages all use the same cache path.
+- See [Remote Lbug Databases](/storage/remote-lbug) for the exact query and cache flow.
+
 ### In-Memory Mode
 
 When the database is opened with an empty path or `:memory:`, the native backend skips all

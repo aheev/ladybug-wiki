@@ -11,6 +11,7 @@ This wiki covers algorithms, data structures, and implementation decisions for c
 | The big picture | [Architecture Overview](/overview) |
 | How schema and DDL work | [Catalog System](/catalog) |
 | How data is stored on disk | [Node Groups & Columnar Layout](/storage/node-groups) |
+| How attached remote Lbug DBs work | [Remote Lbug Databases](/storage/remote-lbug) |
 | How queries execute across CPU cores | [Morsel-Driven Parallelism](/execution/morsel) |
 | How a `MATCH` executes end-to-end | [Cypher Query Walkthroughs](/query/cypher-internals) |
 | How transactions and MVCC work | [Transaction Lifecycle](/transaction/mvcc) · [TransactionManager](/transaction/transaction-manager) |
@@ -47,6 +48,7 @@ Columnar storage partitioned into **node groups** of 131,072 nodes each. Propert
 - [Shadow File & WAL](/storage/shadow-wal) — crash recovery, atomic page swap
 - [WAL Internals (Two-Tier)](/storage/wal-internals) — LocalWAL vs shared WAL, record types, recovery algorithm
 - [Storage Backends](/storage/storage-backends) — native, Arrow, Icebug-Disk, in-memory
+- [Remote Lbug Databases](/storage/remote-lbug) — attached remote paths, page cache, index reads
 - [Icebug-Disk Format](/storage/icebug-disk) — on-disk file layout
 - [Native Rel Tables](/storage/native-rel-tables) — relationship table layout, adjacency list structure, CSR integration
 

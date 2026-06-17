@@ -49,6 +49,7 @@ export default defineConfig({
           { text: 'Shadow File & WAL', link: '/storage/shadow-wal' },
           { text: 'WAL Internals (Two-Tier)', link: '/storage/wal-internals' },
           { text: 'Storage Backends', link: '/storage/storage-backends' },
+          { text: 'Remote Lbug Databases', link: '/storage/remote-lbug' },
           { text: 'Icebug-Disk Format', link: '/storage/icebug-disk' },
           { text: 'Native Rel Tables', link: '/storage/native-rel-tables' },
         ],
